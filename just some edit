@@ -1,0 +1,144 @@
+#include <IRremote.h>
+#include <EEPROM.h>
+int RECV_PIN = 11;
+int relay1 = 8;
+int relay2 = 3;
+int relay3 = 4;
+int relay4 = 5;
+
+int on4 = 0; // taking this variables for each relay 1,2,3 & 4
+int on1 = 0;
+int on2 = 0;
+int on3 = 0;
+
+IRrecv irrecv(RECV_PIN);
+decode_results results;
+
+void setup()
+{
+digitalWrite(relay4,LOW);
+pinMode(relay4, OUTPUT);
+
+digitalWrite(relay3, LOW);
+pinMode(relay3, OUTPUT);
+
+digitalWrite(relay2, LOW);
+pinMode(relay2, OUTPUT);
+
+
+digitalWrite(relay1, LOW);
+pinMode(relay1, OUTPUT);
+
+pinMode(13, HIGH);
+
+    if(EEPROM.read(1)==1)
+   {    
+    
+        on1=1;    
+        digitalWrite(relay1,on1);
+   }
+       if(EEPROM.read(2)==1)
+   {    
+        on2=1;    
+        digitalWrite(relay2,on1);
+   }
+       if(EEPROM.read(3)==1)
+   {    
+        on3=1;    
+        digitalWrite(relay3,on1);
+   }
+       if(EEPROM.read(4)==1)
+   {    
+        on4=1;    
+        digitalWrite(relay4,on4);
+   }
+
+
+
+irrecv.enableIRIn(); // Start the receiver
+Serial.begin(9600);
+}
+
+
+unsigned long last = millis();
+
+void loop() {
+if (irrecv.decode(&results))
+{
+if (results.value == 33454215)
+{ // Remote Control Power Code
+// If it's been at least 1/4 second since the last
+// IR received, toggle the relay
+if (millis() - last > 250) 
+{
+on1 = !on1;
+digitalWrite(relay1, on1 ? HIGH : LOW);
+EEPROM.write(1,on1);
+}
+last = millis();
+} 
+//EXTRA CODE FROM HERE FOR TESTING WITH OTHER REMOTE CONTROLS
+
+if (irrecv.decode(&results))
+{
+if (results.value == 0x61D640DF) 
+{ // Remote Control Power Code
+// If it's been at least 1/4 second since the last
+// IR received, toggle the relay
+if (millis() - last > 250) 
+{
+on1 = !on1;
+digitalWrite(relay1, on1 ? HIGH : LOW);
+EEPROM.write(1,on1);
+}
+last = millis();
+} 
+
+//EXTRA CODE UPTO HERE FOR TESTING WITH OTHER REMOTE CONTROLS
+
+
+
+else if (results.value == 0x61D640BF) 
+{
+if (millis() - last > 250) 
+{
+on2 = !on2;
+digitalWrite(relay2, on2 ? HIGH : LOW);
+EEPROM.write(2,on2);
+}
+last = millis();
+}
+
+
+else if (results.value == 0x40BD28D7 ) 
+{
+if (millis() - last > 250) 
+{
+on1 = !on1;
+digitalWrite(relay1, on1 ? HIGH : LOW);
+EEPROM.write(1,on1);
+}
+last = millis();
+
+
+
+
+}
+
+
+else if (results.value == 0x61D6609F) 
+{
+if (millis() - last > 250) 
+{
+on4 = !on4;
+digitalWrite(relay4, on4 ? HIGH : LOW);
+EEPROM.write(4,on4);
+}
+last = millis();
+
+}
+Serial.print(results.value);
+Serial.print('\n');
+irrecv.resume('\t'); // Receive the next value
+}
+}}
